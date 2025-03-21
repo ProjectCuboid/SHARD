@@ -1,37 +1,36 @@
 from flask import Flask, render_template, request, jsonify
-import subprocess
-import shlex
-import platform
+from langchain_ollama import Ollama
 
 app = Flask(__name__)
 
-# Detect OS
-OS_TYPE = platform.system()
+# Initialize Ollama
+ollama = Ollama()
+history = []
 
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-@app.route("/execute", methods=["POST"])
-def execute():
-    command = request.form.get("command")
-
-    # Prevent dangerous commands (improve as needed)
-    blocked_commands = ["rm", "del", "shutdown", "reboot", "poweroff", "format", "mkfs"]
-    if any(cmd in command for cmd in blocked_commands):
-        return jsonify({"output": "Blocked command for security reasons."})
-
+# Helper function to get response from Ollama API
+def get_response(query):
     try:
-        # Use PowerShell on Windows, Shell on Linux/macOS
-        if OS_TYPE == "Windows":
-            result = subprocess.run(["powershell", "-Command", command], capture_output=True, text=True, shell=True)
-        else:
-            result = subprocess.run(shlex.split(command), capture_output=True, text=True)
-
-        return jsonify({"output": result.stdout or result.stderr})
-    
+        # Make the request to the Ollama API
+        response = ollama.chat(
+            model="gemma2:2b",
+            messages=[{"role": "user", "content": query}],
+        )
+        # Update conversation history
+        history.append(f"USER: {query}")
+        history.append(f"AI: {response['content']}")
+        return response['content']
     except Exception as e:
-        return jsonify({"output": f"Error: {str(e)}"})
+        return str(e)
 
-if __name__ == "__main__":
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/get_response', methods=['POST'])
+def get_response_api():
+    user_input = request.form.get('query')
+    response = get_response(user_input)
+    return jsonify({'response': response, 'history': '\n'.join(history)})
+
+if __name__ == '__main__':
     app.run(debug=True)
