@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Terminal Control</title>
+</head>
+<body>
+    <h2>Execute Terminal Commands</h2>
+    <form id="commandForm">
+        <input type="text" id="command" placeholder="Enter command" required>
+        <button type="submit">Run</button>
+    </form>
+    <pre id="output"></pre>
+
+    <script>
+        document.getElementById("commandForm").onsubmit = function(event) {
+            event.preventDefault();
+            let command = document.getElementById("command").value;
+
+            fetch("/execute", {
+                method: "POST",
+                body: new URLSearchParams({ "command": command }),
+                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById("output").innerText = data.output;
+            });
+        };
+    </script>
+</body>
+</html>
