@@ -1,31 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Terminal Control</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funny Chatbot</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #chat { margin-top: 20px; }
+        .user-message, .ai-message { padding: 10px; margin-bottom: 10px; }
+        .user-message { background-color: #f0f0f0; }
+        .ai-message { background-color: #e0e0e0; }
+        #history { margin-top: 20px; font-size: 14px; color: gray; white-space: pre-wrap; }
+    </style>
 </head>
 <body>
-    <h2>Execute Terminal Commands</h2>
-    <form id="commandForm">
-        <input type="text" id="command" placeholder="Enter command" required>
-        <button type="submit">Run</button>
-    </form>
-    <pre id="output"></pre>
+    <h1>Funny AI Chatbot</h1>
+    <div>
+        <textarea id="user_input" placeholder="Ask anything..." rows="4" cols="50"></textarea><br>
+        <button id="send_btn">Send</button>
+    </div>
+
+    <div id="chat"></div>
+    <div id="history"></div>
 
     <script>
-        document.getElementById("commandForm").onsubmit = function(event) {
-            event.preventDefault();
-            let command = document.getElementById("command").value;
+        document.getElementById('send_btn').addEventListener('click', function() {
+            const user_input = document.getElementById('user_input').value;
+            if (user_input.trim() === "") return;
 
-            fetch("/execute", {
-                method: "POST",
-                body: new URLSearchParams({ "command": command }),
-                headers: { "Content-Type": "application/x-www-form-urlencoded" }
+            // Display the user's message
+            const userMessageDiv = document.createElement('div');
+            userMessageDiv.className = 'user-message';
+            userMessageDiv.innerText = "USER: " + user_input;
+            document.getElementById('chat').appendChild(userMessageDiv);
+
+            // Send the query to the server
+            fetch('/get_response', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'query=' + encodeURIComponent(user_input)
             })
             .then(response => response.json())
             .then(data => {
-                document.getElementById("output").innerText = data.output;
-            });
-        };
+                // Display the AI's response
+                const aiMessageDiv = document.createElement('div');
+                aiMessageDiv.className = 'ai-message';
+                aiMessageDiv.innerText = "AI: " + data.response;
+                document.getElementById('chat').appendChild(aiMessageDiv);
+
+                // Update chat history
+                document.getElementById('history').innerText = data.history;
+                document.getElementById('user_input').value = ''; // Clear input field
+            })
+            .catch(error => console.error('Error:', error));
+        });
     </script>
 </body>
 </html>
