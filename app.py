@@ -1,13 +1,18 @@
+import logging
 from flask import Flask, render_template, request, jsonify
 from langchain_ollama import OllamaLLM
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)  # You can change the level to DEBUG if you want more detailed logs
+logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 # Initialize Ollama model once globally
-ollama = OllamaLLM(model='codellama')
+ollama = OllamaLLM(model='gemma2:2b')
 
-# Check if the model is initialized correctly
-print(ollama)  # This will print out the model information in your terminal
+# Log model initialization (instead of print)
+logger.info("Ollama model initialized successfully")
 
 # Helper function to get response from Ollama API
 context = ""
@@ -19,10 +24,11 @@ def get_response(query):
         result = ollama.invoke({"context": context, "question": query})
         context += f"User: {query} \n"
         context += f"Ai: {result} \n"
+        logger.info(f"Received response: {result}")
         return result
     except Exception as e:
-        # Log error to help debug
-        print(f"Error while getting response: {e}")
+        # Log the error
+        logger.error(f"Error while getting response: {e}")
         return str(e)
 
 @app.route('/')
@@ -32,6 +38,7 @@ def index():
 @app.route('/get_response', methods=['POST'])
 def get_response_api():
     user_input = request.form.get('query')
+    logger.info(f"User input: {user_input}")
     response = get_response(user_input)
     return jsonify({'response': response, 'history': context})
 
