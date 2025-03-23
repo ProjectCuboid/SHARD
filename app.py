@@ -1,36 +1,28 @@
 from flask import Flask, render_template, request, jsonify
 from langchain_ollama import OllamaLLM
-from langchain.prompts import ChatPromptTemplate  # Import the required prompt template class
 
 app = Flask(__name__)
 
-# Initialize Ollama
+# Initialize Ollama model once globally
 ollama = OllamaLLM(model='codellama')
 
-# Adjusted template and prompt
-t = """
-Here is the conversation history: {context}
-
-Prompt: {question}
-
-You are a funny chatbot.
-"""
-prompt = ChatPromptTemplate.from_template(t)
-
-# Create a chain from the prompt and Ollama
-chain = prompt | ollama
+# Check if the model is initialized correctly
+print(ollama)  # This will print out the model information in your terminal
 
 # Helper function to get response from Ollama API
 context = ""
 
 def get_response(query):
-    global context  # Use global so you can modify the context variable
+    global context  # Use global to modify the context variable
     try:
-        result = chain.invoke({"context": context, "question": query})
+        # Get the result from the model
+        result = ollama.invoke({"context": context, "question": query})
         context += f"User: {query} \n"
         context += f"Ai: {result} \n"
         return result
     except Exception as e:
+        # Log error to help debug
+        print(f"Error while getting response: {e}")
         return str(e)
 
 @app.route('/')
@@ -45,4 +37,3 @@ def get_response_api():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5500)
-
