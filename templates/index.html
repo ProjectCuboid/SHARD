@@ -3,67 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funny Chatbot</title>
+    <title>Ollama Chatbot</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
-        h1 { text-align: center; margin-top: 20px; }
-        #chat { margin-top: 20px; max-height: 400px; overflow-y: auto; padding: 10px; border: 1px solid #ddd; }
-        .user-message, .ai-message { padding: 10px; margin-bottom: 10px; border-radius: 5px; }
-        .user-message { background-color: #f0f0f0; align-self: flex-start; }
-        .ai-message { background-color: #e0e0e0; align-self: flex-end; }
-        #history { margin-top: 20px; font-size: 14px; color: gray; white-space: pre-wrap; }
-        textarea { font-size: 14px; padding: 10px; width: 80%; }
-        button { font-size: 16px; padding: 10px 15px; cursor: pointer; }
-        #input-section { text-align: center; margin-top: 20px; }
-    </style>
-</head>
-<body>
-    <h1>Funny AI Chatbot</h1>
-    
-    <div id="input-section">
-        <textarea id="user_input" placeholder="Ask anything..." rows="4" cols="50"></textarea><br>
-        <button id="send_btn">Send</button>
-    </div>
-
-    <div id="chat"></div>
-    <div id="history"></div>
-
-    <script>
-        document.getElementById('send_btn').addEventListener('click', function() {
-            const user_input = document.getElementById('user_input').value;
-            if (user_input.trim() === "") return;
-
-            // Display the user's message
-            const userMessageDiv = document.createElement('div');
-            userMessageDiv.className = 'user-message';
-            userMessageDiv.innerText = "USER: " + user_input;
-            document.getElementById('chat').appendChild(userMessageDiv);
-
-            // Send the query to the server
-            fetch('/get_response', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: 'query=' + encodeURIComponent(user_input)
-            })
-            .then(response => response.json())
-            .then(data => {
-                // Display the AI's response
-                const aiMessageDiv = document.createElement('div');
-                aiMessageDiv.className = 'ai-message';
-                aiMessageDiv.innerText = "AI: " + data.response;
-                document.getElementById('chat').appendChild(aiMessageDiv);
-
-                // Update chat history
-                document.getElementById('history').innerText = data.history;
-
-                // Clear the input field and scroll to the latest message
-                document.getElementById('user_input').value = '';
-                document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    </script>
-</body>
-</html>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .chat-container {
+            border: 1px solid #ddd;
+            padding: 20px;
+            width: 60%;
+            margin: 0 auto;
+        }
+        .chat-box {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        .chat-history {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style
